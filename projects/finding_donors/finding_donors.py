@@ -521,11 +521,13 @@ vs.evaluate(results, accuracy, fscore)
 # 
 # **Note:** Depending on the algorithm chosen and the parameter list, the following implementation may take some time to run!
 
-# In[19]:
+# In[28]:
 
 # TODO: Import 'GridSearchCV', 'make_scorer', and any other necessary libraries
 from sklearn import grid_search
 from sklearn.grid_search import GridSearchCV
+from sklearn.grid_search import RandomizedSearchCV
+from scipy.stats import uniform as sp_uniform
 from sklearn.metrics import make_scorer, fbeta_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import linear_model
@@ -553,9 +555,21 @@ grid_fit = grid_obj.fit(X_train, y_train)
 # Get the estimator
 best_clf = grid_fit.best_estimator_
 
-# Make predictions using the unoptimized and model
+# ------Try Randomized Search------
+# specify parameters and distributions to sample from; use the same range for alpha
+param_dist = {"alpha": sp_uniform(0.00001, 1),
+              'loss' : ['hinge', 'log', 'perceptron']}
+# use the same number of parameter settings that are sampled as in GridSearchCV
+n_iter_search = 18
+random_obj = RandomizedSearchCV(clf, param_distributions=param_dist,
+                                n_iter=n_iter_search, scoring=scorer)
+random_fit= random_obj.fit(X_train, y_train)
+best_random_clf = random_fit.best_estimator_
+
+# Make predictions using the unoptimized and optimized models
 predictions = (clf.fit(X_train, y_train)).predict(X_test)
 best_predictions = best_clf.predict(X_test)
+best_random_predictions = best_random_clf.predict(X_test)
 
 # Report the before-and-afterscores
 print "Unoptimized model\n------"
@@ -569,7 +583,14 @@ print "Final F-score on the testing data: {:.4f}".format(fbeta_score(y_test, bes
 print "\nOptimized Model's parameters\n------"
 print "alpha: {:.5f}".format(best_clf.alpha)
 print "loss: ", (best_clf.loss)
-print (best_clf)
+
+print "\nOptimized Random Search Model\n------"
+print "Final accuracy score on the testing data: {:.4f}".format(accuracy_score(y_test, best_random_predictions))
+print "Final F-score on the testing data: {:.4f}".format(fbeta_score(y_test, best_random_predictions, beta = 0.5))
+
+print "\nOptimized Random Search Model's parameters\n------"
+print "alpha: {:.5f}".format(best_random_clf.alpha)
+print "loss: ", (best_random_clf.loss)
 
 
 # ### Question 5 - Final Model Evaluation

@@ -19,7 +19,7 @@
 # 
 # Run the code block below to load the wholesale customers dataset, along with a few of the necessary Python libraries required for this project. You will know the dataset loaded successfully if the size of the dataset is reported.
 
-# In[153]:
+# In[57]:
 
 # Import libraries necessary for this project
 import numpy as np
@@ -46,7 +46,7 @@ except:
 # 
 # Run the code block below to observe a statistical description of the dataset. Note that the dataset is composed of six important product categories: **'Fresh'**, **'Milk'**, **'Grocery'**, **'Frozen'**, **'Detergents_Paper'**, and **'Delicatessen'**. Consider what each category represents in terms of products you could purchase.
 
-# In[154]:
+# In[58]:
 
 # Display a description of the dataset
 display(data.describe())
@@ -55,7 +55,7 @@ display(data.describe())
 # ### Implementation: Selecting Samples
 # To get a better understanding of the customers and how their data will transform through the analysis, it would be best to select a few sample data points and explore them in more detail. In the code block below, add **three** indices of your choice to the `indices` list which will represent the customers to track. It is suggested to try different sets of samples until you obtain customers that vary significantly from one another.
 
-# In[155]:
+# In[59]:
 
 # TODO: Select three indices of your choice you wish to sample from the dataset
 indices = [50, 200, 355]
@@ -98,16 +98,16 @@ display(samples)
 #  - Import a decision tree regressor, set a `random_state`, and fit the learner to the training data.
 #  - Report the prediction score of the testing set using the regressor's `score` function.
 
-# In[156]:
+# In[60]:
 
 from sklearn.cross_validation import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 
 # TODO: Make a copy of the DataFrame, using the 'drop' function to drop the given feature
-new_data = data
-new_data.drop('Delicatessen', axis = 1)
+new_data = data.copy()
+new_data.drop('Detergents_Paper', axis=1, inplace=True)
 
-new_y = data['Delicatessen']
+new_y = data['Detergents_Paper']
 
 # TODO: Split the data into training and testing sets(0.25) using the given feature as the target
 # Set a random state.
@@ -132,16 +132,19 @@ print(score)
 
 # **Answer:**
 # - I tried all the features
-# - Fresh: 0.84574537897; Milk: 0.81128046765; Grocery: 0.946592478448; Frozen: 0.918689466406; Detergents_Paper: 0.933171062732; Delicatessen: 0.98335369844
-# - Fresh and Milk are relatively lower, and thus are more necessary features; while Delicatessen's score is quite close to 1, so it is not necessary for identifying customers' spending habits.
+# - Fresh: -0.349304649003; Milk: 0.0259958710115; Grocery: 0.760243470333; Frozen: -0.292204006048; Detergents_Paper: 0.684072542177; Delicatessen: -5.39421129666
+# - Except for Grocery and Detergents_Paper, all the other features got very low score or even negative scores, so they are necessary. Grocery and Detergents_Paper have score of ~0.7-0.8, so they cannot be perfectly predicted by other features and thus better be kept.
 
 # ### Visualize Feature Distributions
 # To get a better understanding of the dataset, we can construct a scatter matrix of each of the six product features present in the data. If you found that the feature you attempted to predict above is relevant for identifying a specific customer, then the scatter matrix below may not show any correlation between that feature and the others. Conversely, if you believe that feature is not relevant for identifying a specific customer, the scatter matrix might show a correlation between that feature and another feature in the data. Run the code block below to produce a scatter matrix.
 
-# In[157]:
+# In[61]:
 
 # Produce a scatter matrix for each pair of features in the data
 pd.scatter_matrix(data, alpha = 0.3, figsize = (14,8), diagonal = 'kde');
+
+# Get the correlations of all feature pairs 
+data.corr()
 
 
 # ### Question 3
@@ -153,10 +156,10 @@ pd.scatter_matrix(data, alpha = 0.3, figsize = (14,8), diagonal = 'kde');
 # **Hint:** Is the data normally distributed? Where do most of the data points lie? You can use [corr()](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.corr.html) to get the feature correlations and then visualize them using a [heatmap](http://seaborn.pydata.org/generated/seaborn.heatmap.html)(the data that would be fed into the heatmap would be the correlation values, for eg: `data.corr()`) to gain further insight.
 
 # **Answer:**
-# - The data is not normally distributed for all categories. Most of the data points lie in the lower-value zone. There are some outliers for each category in higher value zone, while we cannot tell about the outliers in lower value zone.
-# - Correlation: Grocery & Detergents_Paper have nearly linear correlation; Delicatessen have narrowly-distributed values in certain ranges of other categories.
-# - This confirms the relevance of the feature I attempted to predict above: Declicatessen is easy to be predicted by using other features; Grocery and Detergents_Paper also get high scores.
-# - Delicatessen has values in a narrow range; Grocery and Detergents_Paper have wider distribution ranges, but are still quite crowded in the lower-value zone.
+# - The data is not normally distributed for all categories, but are right-skewed instead, which is confirmed by the larger mean values than median values in the "Data Exploration" section. There are some outliers for each category in higher value zone.
+# - Correlation: Grocery & Detergents_Paper are most significantly correlated, and Milk is also mildly correlated to both of them.
+# - This confirms the relevance of the feature I attempted to predict above: Grocery and Detergents_Paper have highest scores; and Milk is the only positive-scored one in the other features.
+# - The data distribution of these features are like the others, namely right-skewed with most of data points in the lower-value zone.
 
 # ## Data Preprocessing
 # In this section, you will preprocess the data to create a better representation of customers by performing a scaling on the data and detecting (and optionally removing) outliers. Preprocessing data is often times a critical step in assuring that results you obtain from your analysis are significant and meaningful.
@@ -168,7 +171,7 @@ pd.scatter_matrix(data, alpha = 0.3, figsize = (14,8), diagonal = 'kde');
 #  - Assign a copy of the data to `log_data` after applying logarithmic scaling. Use the `np.log` function for this.
 #  - Assign a copy of the sample data to `log_samples` after applying logarithmic scaling. Again, use `np.log`.
 
-# In[158]:
+# In[62]:
 
 # TODO: Scale the data using the natural logarithm
 log_data = np.log(data)
@@ -185,7 +188,7 @@ pd.scatter_matrix(log_data, alpha = 0.3, figsize = (14,8), diagonal = 'kde');
 # 
 # Run the code below to see how the sample data has changed after having the natural logarithm applied to it.
 
-# In[159]:
+# In[63]:
 
 # Display the log-transformed sample data
 display(log_samples)
@@ -203,7 +206,7 @@ display(log_samples)
 # **NOTE:** If you choose to remove any outliers, ensure that the sample data does not contain any of these points!  
 # Once you have performed this implementation, the dataset will be stored in the variable `good_data`.
 
-# In[160]:
+# In[64]:
 
 # For each feature find the data points with extreme high or low values
 for feature in log_data.keys():
@@ -239,7 +242,7 @@ good_data = log_data.drop(log_data.index[outliers]).reset_index(drop = True)
 # - Yes, e.g. datapoint 65 is outlier in smaller-value zone of Fresh and Frozen; datapoint 66 & 128 is outlier in smaller-value zone of Fresh and Delicatessen; datapoint 75 is outlier in smaller-value zone in Grocery and Detergents_Paper; datapoint 154 is outlier in smaller-value zone in Milk, Grocery, and Delicatessen; 
 # - I think these data points should be removed.
 # - These data points are unusual, as the datapoint 355 chosen as a sample data point has much smaller values than mean values in every category, but still is outlier in only 1 category. So the data points who are outliers in multiple categories are either in special types of establishements, or have other resources to purchase those categories.
-# - Also, for k-means methods, the calculation of centers would be significantly affected by outlier datapoints, so it would be helpful for more precise centers to remove those outliers.
+# - Also, for k-means methods, the calculation of centers would be significantly affected by outlier datapoints, so it would be helpful for more precise centers to remove those outliers. Furthermore, too many outliers might even bring an unnecessary extra cluster with better silhouette score.
 
 # ## Feature Transformation
 # In this section you will use principal component analysis (PCA) to draw conclusions about the underlying structure of the wholesale customer data. Since using PCA on a dataset calculates the dimensions which best maximize variance, we will find which compound combinations of features best describe customers.
@@ -252,7 +255,7 @@ good_data = log_data.drop(log_data.index[outliers]).reset_index(drop = True)
 #  - Import `sklearn.decomposition.PCA` and assign the results of fitting PCA in six dimensions with `good_data` to `pca`.
 #  - Apply a PCA transformation of `log_samples` using `pca.transform`, and assign the results to `pca_samples`.
 
-# In[161]:
+# In[65]:
 
 from sklearn.decomposition import PCA
 # TODO: Apply PCA by fitting the good data with the same number of dimensions as features
@@ -277,13 +280,18 @@ pca_results = vs.pca_results(good_data, pca)
 # **Answer:**
 # - The 1st and 2nd principle components explain about variance of 0.7 in total.
 # - The 1st 4 principle components explain about 0.93.
-# - The 1st component represents Milk, Grocery, and Detergents_Paper well; the 2nd represnets Fresh, Frozen and Delicatessen well; the 3rd represents Delicatessen well and has significant negative variance in Fresh; the 4th represents Frozen in positve and Delicatessen in negative; the 5th represents Detergents_Paper in positive and Milk in negative; the 6th represents Milk in positive and Grocery in negative.
+# - The 1st component represents Milk, Grocery, and Detergents_Paper well, so it might represent grocery store; 
+# - the 2nd represents Fresh, Frozen and Delicatessen well, so it might represent restaurant; 
+# - the 3rd represents Delicatessen and Frozen well in positive, and has significant negative variance in Fresh, so it might represent deli; 
+# - the 4th represents Frozen in positve and Delicatessen in negative, so it might represent stores that sell frozen stuff like ice cream or frozen yogurt; 
+# - the 5th represents Detergents_Paper in positive and Milk and Grocery in negative; 
+# - the 6th represents Milk in positive and Grocery in negative.
 # 
 
 # ### Observation
 # Run the code below to see how the log-transformed sample data has changed after having a PCA transformation applied to it in six dimensions. Observe the numerical value for the first four dimensions of the sample points. Consider if this is consistent with your initial interpretation of the sample points.
 
-# In[162]:
+# In[66]:
 
 # Display sample log-data after having a PCA transformation applied
 display(pd.DataFrame(np.round(pca_samples, 4), columns = pca_results.index.values))
@@ -297,7 +305,7 @@ display(pd.DataFrame(np.round(pca_samples, 4), columns = pca_results.index.value
 #  - Apply a PCA transformation of `good_data` using `pca.transform`, and assign the results to `reduced_data`.
 #  - Apply a PCA transformation of `log_samples` using `pca.transform`, and assign the results to `pca_samples`.
 
-# In[163]:
+# In[67]:
 
 # TODO: Apply PCA by fitting the good data with only two dimensions
 pca = PCA(2)
@@ -316,7 +324,7 @@ reduced_data = pd.DataFrame(reduced_data, columns = ['Dimension 1', 'Dimension 2
 # ### Observation
 # Run the code below to see how the log-transformed sample data has changed after having a PCA transformation applied to it using only two dimensions. Observe how the values for the first two dimensions remains unchanged when compared to a PCA transformation in six dimensions.
 
-# In[164]:
+# In[68]:
 
 # Display sample log-data after applying PCA transformation in two dimensions
 display(pd.DataFrame(np.round(pca_samples, 4), columns = ['Dimension 1', 'Dimension 2']))
@@ -327,7 +335,7 @@ display(pd.DataFrame(np.round(pca_samples, 4), columns = ['Dimension 1', 'Dimens
 # 
 # Run the code cell below to produce a biplot of the reduced-dimension data.
 
-# In[165]:
+# In[69]:
 
 # Create a biplot
 vs.biplot(good_data, reduced_data, pca)
@@ -352,9 +360,9 @@ vs.biplot(good_data, reduced_data, pca)
 # ** Hint: ** Think about the differences between hard clustering and soft clustering and which would be appropriate for our dataset.
 
 # **Answer:**
-# - K-Means: a datapoint can only belong to 1 cluster; fast speed, so it can scale well for large dataset
-# - GMM: can assign a datapoint to more than 1 cluster with a score (posterior probability) for each cluster; can accommodate clusters that have different sizes and correlation structures within them
-# - For the given customer data, the main variance are in the 1st principle component and the 2nd principle component, where 3 features are strongly correlated with 1st component and the other 3 features are strongly correlated with 2nd component. So I think K-Means might be more suitable in our case.
+# - K-Means: a datapoint can only be assigned to 1 cluster; usually works well if the clusters are spherical; usually doesn't work well for clusters with different sizes and different densities; usually is faster than GMM, so it can scale well for large datasets.
+# - GMM: can assign a datapoint to more than 1 cluster with a score (posterior probability) for each cluster; can accommodate clusters that have different sizes and correlation structures within them.|
+# - For reduced_data in 2 principle component dimensions, there are not clear boundaries between clusters, so we might better use soft clustering like GMM; also the clusters don't look spherical or have similar sizes/densities; furthermore, the dataset size is pretty small, so the slower speed of GMM should not be a big issue. 
 
 # ### Implementation: Creating Clusters
 # Depending on the problem, the number of clusters that you expect to be in the data may already be known. When the number of clusters is not known *a priori*, there is no guarantee that a given number of clusters best segments the data, since it is unclear what structure exists in the data — if any. However, we can quantify the "goodness" of a clustering by calculating each data point's *silhouette coefficient*. The [silhouette coefficient](http://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html) for a data point measures how similar it is to its assigned cluster from -1 (dissimilar) to 1 (similar). Calculating the *mean* silhouette coefficient provides for a simple scoring method of a given clustering.
@@ -367,20 +375,22 @@ vs.biplot(good_data, reduced_data, pca)
 #  - Import `sklearn.metrics.silhouette_score` and calculate the silhouette score of `reduced_data` against `preds`.
 #    - Assign the silhouette score to `score` and print the result.
 
-# In[166]:
+# In[70]:
 
 from sklearn.mixture import GMM
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 # TODO: Apply your clustering algorithm of choice to the reduced data 
-clusterer = KMeans(n_clusters=2)
+#clusterer = KMeans(n_clusters=2)
+clusterer = GMM(2)
 clusterer.fit(reduced_data)
 
 # TODO: Predict the cluster for each data point
 preds = clusterer.predict(reduced_data)
 
 # TODO: Find the cluster centers
-centers = clusterer.cluster_centers_
+#centers = clusterer.cluster_centers_
+centers = clusterer.means_
 
 # TODO: Predict the cluster for each transformed sample data point
 sample_preds = clusterer.predict(pca_samples)
@@ -396,18 +406,18 @@ print(score)
 # * Of these, which number of clusters has the best silhouette score?
 
 # **Answer:**
-# For KMeans, the 2 clusters has the best score
-# - 2: 0.426281015469
-# - 3: 0.39689092645
-# - 4: 0.331352273121
-# - 5: 0.350990778931
-# - 10: 0.346920783748
+# For GMM, the 2 clusters has the best score
+# - 2: 0.411818864386
+# - 3: 0.376166165091
+# - 4: 0.329440981865
+# - 5: 0.280983407051
+# - 10: 0.270869536854
 # 
 
 # ### Cluster Visualization
 # Once you've chosen the optimal number of clusters for your clustering algorithm using the scoring metric above, you can now visualize the results by executing the code block below. Note that, for experimentation purposes, you are welcome to adjust the number of clusters for your clustering algorithm to see various visualizations. The final visualization provided should, however, correspond with the optimal number of clusters. 
 
-# In[167]:
+# In[71]:
 
 # Display the results of the clustering from implementation
 vs.cluster_results(reduced_data, preds, centers, pca_samples)
@@ -421,7 +431,7 @@ vs.cluster_results(reduced_data, preds, centers, pca_samples)
 #  - Apply the inverse function of `np.log` to `log_centers` using `np.exp` and assign the true centers to `true_centers`.
 # 
 
-# In[168]:
+# In[72]:
 
 #from sklearn.decomposition import PCA
 # TODO: Inverse transform the centers
@@ -444,8 +454,8 @@ display(true_centers)
 # **Hint:** A customer who is assigned to `'Cluster X'` should best identify with the establishments represented by the feature set of `'Segment X'`. Think about what each segment represents in terms their values for the feature points chosen. Reference these values with the mean values to get some perspective into what kind of establishment they represent.
 
 # **Answer:**
-# - Segment 0 has values in Fresh and Frozen not far from mean values, and quite smaller values than mean values in other categories, so it could be establishment like restaurant
-# - Segment 1 has higher values in Milk, Grocery, and Detergents_Paper than mean values. The value of Delicatessen is not far from mean value. So it could be establishment like grocery store.
+# - Segment 0 has higher values in Milk, Grocery, and Detergents_Paper than median values. The value of Delicatessen is close to meadian value. So it could be establishment like grocery store.
+# - Segment 1 has values in Fresh and Frozen larger than median values, and values not far from median values in Delicatessen, so it could be establishment like restaurant.
 
 # ### Question 9
 # 
@@ -454,7 +464,7 @@ display(true_centers)
 # 
 # Run the code block below to find which cluster each sample point is predicted to be.
 
-# In[169]:
+# In[73]:
 
 # Display the predictions
 for i, pred in enumerate(sample_preds):
@@ -462,9 +472,10 @@ for i, pred in enumerate(sample_preds):
 
 
 # **Answer:**
-# - Sample point 0 predicted to be in Cluster 0
-# - Sample point 1 predicted to be in Cluster 1
-# - Sample point 2 predicted to be in Cluster 0
+# - Sample point 0 predicted to be in Cluster 1; Sample point 1 in Cluster 0; Sample point 2 in Cluster 0
+# - Data point 0 is closer to Segment 1 feature by feature, and it's far from Segment 0's center point especially in Grocery, Frozen, and Detergents_Paper; it was predicted as a deli store at beginning, and Segment 1 is more like restaurant, so the prediction is pretty close.
+# - Data point 1 is closer to Segment 0 feature by feature, and it's far from Segment 1's center point especially in Milk, Grocery, and Detergents_Paper; it was predicted as a grocery store at beginning, so the prediciton is pretty consistent.
+# - Data point 2 is farther from Segment 0's center point in Milk, Grocery, Detergents_Paper and Delicatessen; it is farther from Segment 1's center point in Fresh and Frozen. Also the distance difference in Detergents_Paper is especially large. So it looks more like belonging to Segment 1 by intuition, but the prediction result is Segment 0, which is a little surprising. But in the clustering output, it seems to be near the boundary of the 2 clusters.
 
 # ## Conclusion
 
@@ -479,6 +490,8 @@ for i, pred in enumerate(sample_preds):
 
 # **Answer:**
 # - The distributor can compare the results before and after the change for different customer segments, to determine which customers would react positively.
+# - Since the best clustering result is 2 clusters, there will be 2 groups of A/B tests needed.
+# - For each test, the control group would be the customer segment's spending with current delivery of 5 days a week, and the experimental group would be customers' spending with delivery of 3 days a week.
 
 # ### Question 11
 # Additional structure is derived from originally unlabeled data when using clustering techniques. Since each customer has a ***customer segment*** it best identifies with (depending on the clustering algorithm applied), we can consider *'customer segment'* as an **engineered feature** for the data. Assume the wholesale distributor recently acquired ten new customers and each provided estimates for anticipated annual spending of each product category. Knowing these estimates, the wholesale distributor wants to classify each new customer to a ***customer segment*** to determine the most appropriate delivery service.  
@@ -496,7 +509,7 @@ for i, pred in enumerate(sample_preds):
 # 
 # Run the code block below to see how each data point is labeled either `'HoReCa'` (Hotel/Restaurant/Cafe) or `'Retail'` the reduced space. In addition, you will find the sample points are circled in the plot, which will identify their labeling.
 
-# In[170]:
+# In[74]:
 
 # Display the clustering results based on 'Channel' data
 vs.channel_results(reduced_data, outliers, pca_samples)
@@ -509,9 +522,10 @@ vs.channel_results(reduced_data, outliers, pca_samples)
 # * Would you consider these classifications as consistent with your previous definition of the customer segments?
 
 # **Answer:**
-# - The number of clusters I chose for K-Means is 2, same as this distribution.
-# - By this distribution, it might be difficult to purely classify a customer segment, as the boundary between these 2 segments are not clear.
-# - The classification of the sample data points are consistent, and the range of 2 clusters are also quite consistent. But the types of establishments of the 2 clusters are a little different from what I thought.
+# - The number of clusters I chose for GMM is 2, same as this distribution.
+# - By this distribution, it might be difficult to purely classify a customer segment, as the boundary between these 2 segments is not clear.
+# - The classification of the sample data points are a little different, as data point 2 is classified in the same cluster as data point 0: it is more consistent with intuition though, because this data point has quite smaller values than median values in every category and it is unlikely to be Retailer. Note that data point 2 is near the boundary of 2 clusters in GMM's result, though.
+# - The types of establishments of the 2 clusters are a little different from what I thought: I didn't think of an establishment like Hotel, which is probably data point 2 belongs to.
 
 # > **Note**: Once you have completed all of the code implementations and successfully answered each question above, you may finalize your work by exporting the iPython Notebook as an HTML document. You can do this by using the menu above and navigating to  
 # **File -> Download as -> HTML (.html)**. Include the finished document along with this notebook as your submission.

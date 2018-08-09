@@ -133,7 +133,7 @@ print(score)
 # **Answer:**
 # - I tried all the features
 # - Fresh: -0.349304649003; Milk: 0.0259958710115; Grocery: 0.760243470333; Frozen: -0.292204006048; Detergents_Paper: 0.684072542177; Delicatessen: -5.39421129666
-# - Except for Grocery and Detergents_Paper, all the other features got very low score or even negative scores, so they are necessary. Grocery and Detergents_Paper have score of ~0.7-0.8, so they cannot be perfectly predicted by other features and thus better be kept.
+# - Except for Grocery and Detergents_Paper, all the other features got very low score or even negative scores which means they cannot be well predicted by other categories, so Grocery and Detergents_Paper are less necessary than others to identify customers' spending habits.
 
 # ### Visualize Feature Distributions
 # To get a better understanding of the dataset, we can construct a scatter matrix of each of the six product features present in the data. If you found that the feature you attempted to predict above is relevant for identifying a specific customer, then the scatter matrix below may not show any correlation between that feature and the others. Conversely, if you believe that feature is not relevant for identifying a specific customer, the scatter matrix might show a correlation between that feature and another feature in the data. Run the code block below to produce a scatter matrix.
